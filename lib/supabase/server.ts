@@ -5,6 +5,9 @@ import { createServerClient } from "@supabase/ssr";
  * Cliente Supabase para Server Components / Route Handlers que respeta la
  * sesión del usuario (JWT de Supabase Auth en cookies) y por lo tanto
  * respeta RLS. Este es el cliente que usa casi todo el código de la app.
+ *
+ * Schema por defecto `elevate` (no `public`): todas las tablas del dominio
+ * viven ahí (ver sql/schema.sql), expuesto en PostgREST junto con `public`.
  */
 export async function createServerSupabase() {
   const cookieStore = await cookies();
@@ -13,6 +16,7 @@ export async function createServerSupabase() {
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
     {
+      db: { schema: "elevate" },
       cookies: {
         getAll() {
           return cookieStore.getAll();

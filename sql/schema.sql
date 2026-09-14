@@ -118,6 +118,6 @@ begin
   end loop;
 end $$;
 
-grant usage on schema elevate to authenticated;
-grant all on all tables in schema elevate to authenticated;
-grant all on all sequences in schema elevate to authenticated;
+grant usage on schema elevate to authenticated, service_role;
+grant all on all tables in schema elevate to authenticated, service_role;
+grant all on all sequences in schema elevate to authenticated, service_role;
