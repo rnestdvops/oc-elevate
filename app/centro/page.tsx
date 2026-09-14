@@ -1,9 +1,9 @@
-import Link from "next/link";
 import Header from "@/components/Header";
+import SelectorPeriodo from "@/components/SelectorPeriodo";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { obtenerDatosCrudos } from "@/lib/datosFinancieros";
 import { calcularPeriodo, operabaEnMes, type Celula } from "@/lib/calculo";
-import { mesActual, ultimosMeses, desplazarMes, formatoMes } from "@/lib/mes";
+import { mesActual, ultimosMeses } from "@/lib/mes";
 import { formatoMoneda } from "@/lib/formato";
 
 const PERIODOS = { mes: 1, trimestre: 3, anio: 12 } as const;
@@ -37,35 +37,13 @@ export default async function CentroPage({
     0
   );
 
-  const tabHref = (p: Periodo) => `/centro?periodo=${p}&mes=${mes}`;
-
   return (
     <>
     <Header />
     <main style={{ padding: "2rem" }}>
       <h1>Centro</h1>
 
-      <nav>
-        {(Object.keys(PERIODOS) as Periodo[]).map((p) => (
-          <Link
-            key={p}
-            href={tabHref(p)}
-            style={{ marginRight: "1rem", fontWeight: p === periodo ? 700 : 400 }}
-          >
-            {p === "mes" ? "Mes" : p === "trimestre" ? "Trimestre" : "Año móvil"}
-          </Link>
-        ))}
-      </nav>
-
-      <p>
-        <Link href={`/centro?periodo=${periodo}&mes=${desplazarMes(mes, -1)}`}>← mes anterior</Link>
-        {" · "}
-        {formatoMes(mes)}
-        {" · "}
-        <Link href={`/centro?periodo=${periodo}&mes=${desplazarMes(mes, 1)}`}>mes siguiente →</Link>
-      </p>
-
-      <p>Período: {formatoMes(meses[0])} a {formatoMes(meses[meses.length - 1])}</p>
+      <SelectorPeriodo basePath="/centro" periodo={periodo} mes={mes} mesesActual={meses} />
 
       <h2>Costo directo por célula de centro</h2>
       <table border={1} cellPadding={6}>

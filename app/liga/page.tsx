@@ -1,5 +1,5 @@
-import Link from "next/link";
 import Header from "@/components/Header";
+import SelectorPeriodo from "@/components/SelectorPeriodo";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { obtenerDatosCrudos } from "@/lib/datosFinancieros";
 import { calcularPeriodo, promedioCI, rankingCI, operabaEnMes, type Celula } from "@/lib/calculo";
@@ -53,38 +53,15 @@ export default async function LigaPage({
     })
     .sort((a, b) => (a.posicion ?? Infinity) - (b.posicion ?? Infinity));
 
-  const tabHref = (p: Periodo) => `/liga?periodo=${p}&mes=${mes}`;
-
   return (
     <>
     <Header />
     <main style={{ padding: "2rem" }}>
       <h1>Liga C/I</h1>
 
-      <nav>
-        {(Object.keys(PERIODOS) as Periodo[]).map((p) => (
-          <Link
-            key={p}
-            href={tabHref(p)}
-            style={{ marginRight: "1rem", fontWeight: p === periodo ? 700 : 400 }}
-          >
-            {p === "mes" ? "Mes" : p === "trimestre" ? "Trimestre" : "Año móvil"}
-          </Link>
-        ))}
-      </nav>
+      <SelectorPeriodo basePath="/liga" periodo={periodo} mes={mes} mesesActual={mesesActual} />
 
-      <p>
-        <Link href={`/liga?periodo=${periodo}&mes=${desplazarMes(mes, -1)}`}>← mes anterior</Link>
-        {" · "}
-        {formatoMes(mes)}
-        {" · "}
-        <Link href={`/liga?periodo=${periodo}&mes=${desplazarMes(mes, 1)}`}>mes siguiente →</Link>
-      </p>
-
-      <p>
-        Período: {formatoMes(mesesActual[0])} a {formatoMes(mesesActual[mesesActual.length - 1])}
-        {promedio !== null && <> · Promedio del grupo: {formatoCI(promedio)}</>}
-      </p>
+      {promedio !== null && <p>Promedio del grupo: {formatoCI(promedio)}</p>}
 
       <p style={{ color: "var(--color-text-muted)" }}>
         La liga es para conversar entre células, no para evaluar mérito — mostrá posición y
