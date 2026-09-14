@@ -1,5 +1,39 @@
+/*
+ * Paleta — verificada contra elevatemas.io (inspección de estilos
+ * computados, no del material de marca original). Los tres primeros grupos
+ * (oscuros, naranja, rojo) están confirmados así; morado y verde menta NO
+ * aparecen en el CSS del sitio (viven en ilustraciones raster, no
+ * inspeccionables) — se mantienen como estimación documentada, no
+ * confirmada.
+ */
 :root {
-  color-scheme: light dark;
+  color-scheme: light;
+
+  --color-brand-dark: #1e1b30;
+  --color-brand-dark-panel: #3c3751;
+  --color-brand-orange: #f47623;
+  --color-brand-orange-hover: #d4661e;
+  --color-brand-purple: #6e63c9; /* estimado, no confirmado en el sitio */
+  --color-brand-mint: #4cc38a; /* estimado, no confirmado en el sitio */
+
+  --color-neutral-0: #ffffff;
+  --color-neutral-50: #f7f7f9;
+  --color-neutral-100: #ededf2;
+  --color-neutral-200: #d7d7e0;
+  --color-neutral-400: #9c9cad;
+  --color-neutral-700: #4a4a57;
+  --color-neutral-900: #1f1f24;
+
+  --color-text-on-dark: #ffffff;
+  --color-text-on-light: #1f1f24;
+  --color-text-muted: #6b6b78;
+
+  --color-success: var(--color-brand-mint);
+  --color-attention: var(--color-brand-orange);
+  --color-danger: #f0403e;
+
+  --font-display: var(--font-montserrat), sans-serif;
+  --font-body: var(--font-montserrat), sans-serif;
 }
 
 * {
@@ -8,7 +42,59 @@
 
 body {
   margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-family: var(--font-body);
+  background: var(--color-neutral-50);
+  color: var(--color-text-on-light);
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+a {
+  color: var(--color-brand-orange);
+}
+
+table {
+  border-collapse: collapse;
+  background: var(--color-neutral-0);
+  border-color: var(--color-neutral-200) !important;
+}
+
+th {
+  background: var(--color-neutral-100);
+  text-align: left;
+}
+
+button, .btn {
+  font-family: var(--font-body);
+  background: var(--color-brand-orange);
+  color: var(--color-text-on-dark);
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+button:hover, .btn:hover {
+  background: var(--color-brand-orange-hover);
+}
+
+.btn-secundario {
+  background: var(--color-neutral-200);
+  color: var(--color-text-on-light);
+}
+
+input, select {
+  font-family: var(--font-body);
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 4px;
+  padding: 0.4rem;
+}
+
+.aviso {
+  color: var(--color-danger);
 }
 
 .loginPage {
@@ -16,4 +102,34 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+}
+
+.appHeader {
+  background: var(--color-brand-dark-panel);
+  color: var(--color-text-on-dark);
+  padding: 1rem 2rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.appHeader a {
+  color: var(--color-text-on-dark);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.appHeader a:hover {
+  text-decoration: underline;
+}
+
+.appHeader nav ul {
+  list-style: none;
+  display: flex;
+  gap: 1.25rem;
+  margin: 0;
+  padding: 0;
+  flex-wrap: wrap;
 }

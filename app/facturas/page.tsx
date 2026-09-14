@@ -1,3 +1,58 @@
-export default function Page() {
-  return <main style={{ padding: "2rem" }}><h1>facturas</h1><p>Pendiente de construir.</p></main>;
+import Link from "next/link";
+import Header from "@/components/Header";
+import { createServerSupabase } from "@/lib/supabase/server";
+
+export default async function FacturasPage() {
+  const supabase = await createServerSupabase();
+  const { data: facturas, error } = await supabase
+    .from("factura")
+    .select("*, asignacion_de_factura(monto)")
+    .order("fecha_emision", { ascending: false });
+
+  return (
+    <>
+    <Header />
+    <main style={{ padding: "2rem" }}>
+      <h1>Facturas</h1>
+
+      {error && <p>Error al cargar: {error.message}</p>}
+
+      <p><Link href="/facturas/nueva" className="btn">Nueva factura</Link></p>
+
+      <table border={1} cellPadding={6}>
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Tipo</th>
+            <th>Cliente</th>
+            <th>Monto total</th>
+            <th>Repartido</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {facturas?.map((f) => {
+            const repartido = (f.asignacion_de_factura ?? []).reduce(
+              (acc: number, r: { monto: number }) => acc + Number(r.monto),
+              0
+            );
+            const completo = Math.abs(repartido - Number(f.monto_total)) < 0.01;
+            return (
+              <tr key={f.id}>
+                <td>{f.fecha_emision}</td>
+                <td>{f.tipo === "nota_credito" ? "Nota de crédito" : "Factura"}</td>
+                <td>{f.cliente ?? "—"}</td>
+                <td>{f.monto_total}</td>
+                <td className={completo ? "" : "aviso"}>
+                  {repartido}{!completo && " ⚠"}
+                </td>
+                <td><Link href={`/facturas/${f.id}`}>Ver / editar</Link></td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </main>
+    </>
+  );
 }

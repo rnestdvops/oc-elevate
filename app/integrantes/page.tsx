@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Header from "@/components/Header";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { crearIntegrante } from "./actions";
 
@@ -10,8 +11,9 @@ export default async function IntegrantesPage() {
     .order("nombre");
 
   return (
+    <>
+    <Header />
     <main style={{ padding: "2rem" }}>
-      <p><Link href="/">← Inicio</Link></p>
       <h1>Integrantes</h1>
 
       {error && <p>Error al cargar: {error.message}</p>}
@@ -41,5 +43,6 @@ export default async function IntegrantesPage() {
         <button type="submit">Crear</button>
       </form>
     </main>
+    </>
   );
 }

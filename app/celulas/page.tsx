@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Header from "@/components/Header";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { crearCelula } from "./actions";
 
@@ -11,8 +12,9 @@ export default async function CelulasPage() {
     .order("nombre");
 
   return (
+    <>
+    <Header />
     <main style={{ padding: "2rem" }}>
-      <p><Link href="/">← Inicio</Link></p>
       <h1>Células</h1>
 
       {error && <p>Error al cargar: {error.message}</p>}
@@ -63,5 +65,6 @@ export default async function CelulasPage() {
         <button type="submit">Crear</button>
       </form>
     </main>
+    </>
   );
 }

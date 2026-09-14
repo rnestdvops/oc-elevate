@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Header from "@/components/Header";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { mesADate, mesAnterior, mesSiguiente, formatoMes } from "@/lib/mes";
 import {
@@ -56,8 +57,9 @@ export default async function CostosMesPage({
   const copiarMesAnteriorMes = copiarMesAnterior.bind(null, mes);
 
   return (
+    <>
+    <Header />
     <main style={{ padding: "2rem" }}>
-      <p><Link href="/">← Inicio</Link></p>
       <h1>Costos — {formatoMes(mes)}</h1>
       <p>
         <Link href={`/costos/${mesAnterior(mes)}`}>← mes anterior</Link>
@@ -207,5 +209,6 @@ export default async function CostosMesPage({
         <button type="submit">Crear</button>
       </form>
     </main>
+    </>
   );
 }
