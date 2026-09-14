@@ -97,6 +97,12 @@ input, select {
   color: var(--color-danger);
 }
 
+.num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .loginPage {
   min-height: 100vh;
   display: flex;

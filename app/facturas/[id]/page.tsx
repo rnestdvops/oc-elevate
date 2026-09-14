@@ -4,6 +4,7 @@ import Header from "@/components/Header";
 import BotonBorrar from "@/components/BotonBorrar";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { dateAMes } from "@/lib/mes";
+import { formatoMoneda } from "@/lib/formato";
 import {
   actualizarFactura,
   crearReparto,
@@ -86,18 +87,18 @@ export default async function FacturaPage({
 
       <h2>Reparto entre células y meses</h2>
       <p className={completo ? "" : "aviso"}>
-        Repartido: {repartido} de {factura.monto_total} {!completo && "⚠ no coincide con el monto total"}
+        Repartido: {formatoMoneda(repartido)} de {formatoMoneda(factura.monto_total)} {!completo && "⚠ no coincide con el monto total"}
       </p>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Célula</th><th>Mes</th><th>Monto</th><th></th></tr>
+          <tr><th>Célula</th><th>Mes</th><th className="num">Monto</th><th></th></tr>
         </thead>
         <tbody>
           {repartos?.map((r) => (
             <tr key={r.id}>
               <td>{r.celula?.nombre}</td>
               <td>{dateAMes(r.mes)}</td>
-              <td>{r.monto}</td>
+              <td className="num">{formatoMoneda(r.monto)}</td>
               <td>
                 <form action={eliminarReparto.bind(null, id, r.id)}>
                   <BotonBorrar confirmar="¿Borrar esta línea del reparto?" />
@@ -128,13 +129,13 @@ export default async function FacturaPage({
           <h2>Notas de crédito</h2>
           <table border={1} cellPadding={6}>
             <thead>
-              <tr><th>Fecha</th><th>Monto acreditado</th><th></th></tr>
+              <tr><th>Fecha</th><th className="num">Monto acreditado</th><th></th></tr>
             </thead>
             <tbody>
               {notasCredito?.map((n) => (
                 <tr key={n.id}>
                   <td>{n.fecha_emision}</td>
-                  <td>{Math.abs(Number(n.monto_total))}</td>
+                  <td className="num">{formatoMoneda(Math.abs(Number(n.monto_total)))}</td>
                   <td><Link href={`/facturas/${n.id}`}>Ver</Link></td>
                 </tr>
               ))}

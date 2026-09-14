@@ -3,6 +3,7 @@ import Header from "@/components/Header";
 import BotonBorrar from "@/components/BotonBorrar";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { mesADate, mesAnterior, mesSiguiente, formatoMes } from "@/lib/mes";
+import { formatoMoneda } from "@/lib/formato";
 import {
   guardarSueldo,
   eliminarSueldo,
@@ -79,13 +80,13 @@ export default async function CostosMesPage({
       <h2>Sueldos</h2>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Integrante</th><th>Monto</th><th></th></tr>
+          <tr><th>Integrante</th><th className="num">Monto</th><th></th></tr>
         </thead>
         <tbody>
           {sueldos?.map((s) => (
             <tr key={s.id}>
               <td>{s.integrante?.nombre}</td>
-              <td>{s.monto}</td>
+              <td className="num">{formatoMoneda(s.monto)}</td>
               <td>
                 <form action={eliminarSueldo.bind(null, mes, s.id)}>
                   <BotonBorrar />
@@ -107,7 +108,7 @@ export default async function CostosMesPage({
       <h2>Asignaciones (% de dedicación por célula)</h2>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Integrante</th><th>Célula</th><th>%</th><th></th></tr>
+          <tr><th>Integrante</th><th>Célula</th><th className="num">%</th><th></th></tr>
         </thead>
         <tbody>
           {asignaciones?.map((a) => (
@@ -119,7 +120,7 @@ export default async function CostosMesPage({
                 )}
               </td>
               <td>{a.celula?.nombre}</td>
-              <td>{a.porcentaje}</td>
+              <td className="num">{a.porcentaje}</td>
               <td>
                 <form action={eliminarAsignacion.bind(null, mes, a.id)}>
                   <BotonBorrar />
@@ -145,14 +146,14 @@ export default async function CostosMesPage({
       <h2>Servicios de terceros</h2>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Célula</th><th>Proveedor</th><th>Monto</th><th></th></tr>
+          <tr><th>Célula</th><th>Proveedor</th><th className="num">Monto</th><th></th></tr>
         </thead>
         <tbody>
           {servicios?.map((s) => (
             <tr key={s.id}>
               <td>{s.celula?.nombre}</td>
               <td>{s.proveedor_descripcion}</td>
-              <td>{s.monto}</td>
+              <td className="num">{formatoMoneda(s.monto)}</td>
               <td>
                 <form action={eliminarServicio.bind(null, mes, s.id)}>
                   <BotonBorrar />
@@ -175,15 +176,15 @@ export default async function CostosMesPage({
       <h2>Equipamiento — base de depreciación</h2>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Equipamiento</th><th>Costo repos.</th><th>Vida útil (meses)</th><th>Cuota</th><th></th></tr>
+          <tr><th>Equipamiento</th><th className="num">Costo repos.</th><th className="num">Vida útil (meses)</th><th className="num">Cuota</th><th></th></tr>
         </thead>
         <tbody>
           {equiposCosto?.map((e) => (
             <tr key={e.id}>
               <td>{e.equipamiento?.descripcion}</td>
-              <td>{e.costo_reposicion}</td>
-              <td>{e.vida_util_meses}</td>
-              <td>{(Number(e.costo_reposicion) / Number(e.vida_util_meses)).toFixed(2)}</td>
+              <td className="num">{formatoMoneda(e.costo_reposicion)}</td>
+              <td className="num">{e.vida_util_meses}</td>
+              <td className="num">{formatoMoneda(Number(e.costo_reposicion) / Number(e.vida_util_meses))}</td>
               <td>
                 <form action={eliminarEquipamientoCosto.bind(null, mes, e.id)}>
                   <BotonBorrar />

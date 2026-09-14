@@ -4,16 +4,13 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { obtenerDatosCrudos } from "@/lib/datosFinancieros";
 import { calcularPeriodo, operabaEnMes, type Celula } from "@/lib/calculo";
 import { mesActual, ultimosMeses, desplazarMes, formatoMes } from "@/lib/mes";
+import { formatoMoneda } from "@/lib/formato";
 
 const PERIODOS = { mes: 1, trimestre: 3, anio: 12 } as const;
 type Periodo = keyof typeof PERIODOS;
 
 function esPeriodo(v: string | undefined): v is Periodo {
   return v === "mes" || v === "trimestre" || v === "anio";
-}
-
-function formatoMoneda(n: number): string {
-  return n.toLocaleString("es-UY", { maximumFractionDigits: 0 });
 }
 
 export default async function CentroPage({
@@ -73,18 +70,18 @@ export default async function CentroPage({
       <h2>Costo directo por célula de centro</h2>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Célula</th><th>Costo directo</th></tr>
+          <tr><th>Célula</th><th className="num">Costo directo</th></tr>
         </thead>
         <tbody>
           {centro.map((c) => (
             <tr key={c.id}>
               <td>{c.nombre}</td>
-              <td>{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoDirecto ?? 0)}</td>
+              <td className="num">{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoDirecto ?? 0)}</td>
             </tr>
           ))}
           <tr style={{ fontWeight: 700 }}>
             <td>Total centro</td>
-            <td>{formatoMoneda(costoCentroTotal)}</td>
+            <td className="num">{formatoMoneda(costoCentroTotal)}</td>
           </tr>
         </tbody>
       </table>
@@ -98,7 +95,7 @@ export default async function CentroPage({
       <h2>Reparto entre células de periferia que operaban ({periferiaOperando.length})</h2>
       <table border={1} cellPadding={6}>
         <thead>
-          <tr><th>Célula</th><th>Centro asignado</th></tr>
+          <tr><th>Célula</th><th className="num">Centro asignado</th></tr>
         </thead>
         <tbody>
           {celulas
@@ -108,7 +105,7 @@ export default async function CentroPage({
               return (
                 <tr key={c.id} style={{ opacity: operaba ? 1 : 0.5 }}>
                   <td>{c.nombre}{!operaba && " (dada de baja — no participa del reparto)"}</td>
-                  <td>{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoCentroAsignado ?? 0)}</td>
+                  <td className="num">{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoCentroAsignado ?? 0)}</td>
                 </tr>
               );
             })}

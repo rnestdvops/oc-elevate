@@ -1,6 +1,7 @@
 import Link from "next/link";
 import Header from "@/components/Header";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { formatoMoneda } from "@/lib/formato";
 
 export default async function FacturasPage() {
   const supabase = await createServerSupabase();
@@ -25,8 +26,8 @@ export default async function FacturasPage() {
             <th>Fecha</th>
             <th>Tipo</th>
             <th>Cliente</th>
-            <th>Monto total</th>
-            <th>Repartido</th>
+            <th className="num">Monto total</th>
+            <th className="num">Repartido</th>
             <th></th>
           </tr>
         </thead>
@@ -42,9 +43,9 @@ export default async function FacturasPage() {
                 <td>{f.fecha_emision}</td>
                 <td>{f.tipo === "nota_credito" ? "Nota de crédito" : "Factura"}</td>
                 <td>{f.cliente ?? "—"}</td>
-                <td>{f.monto_total}</td>
-                <td className={completo ? "" : "aviso"}>
-                  {repartido}{!completo && " ⚠"}
+                <td className="num">{formatoMoneda(f.monto_total)}</td>
+                <td className={`num${completo ? "" : " aviso"}`}>
+                  {formatoMoneda(repartido)}{!completo && " ⚠"}
                 </td>
                 <td><Link href={`/facturas/${f.id}`}>Ver / editar</Link></td>
               </tr>

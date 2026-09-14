@@ -4,16 +4,13 @@ import { createServerSupabase } from "@/lib/supabase/server";
 import { obtenerDatosCrudos } from "@/lib/datosFinancieros";
 import { calcularPeriodo, promedioCI, rankingCI, operabaEnMes, type Celula } from "@/lib/calculo";
 import { mesActual, ultimosMeses, desplazarMes, formatoMes } from "@/lib/mes";
+import { formatoMoneda } from "@/lib/formato";
 
 const PERIODOS = { mes: 1, trimestre: 3, anio: 12 } as const;
 type Periodo = keyof typeof PERIODOS;
 
 function esPeriodo(v: string | undefined): v is Periodo {
   return v === "mes" || v === "trimestre" || v === "anio";
-}
-
-function formatoMoneda(n: number): string {
-  return n.toLocaleString("es-UY", { maximumFractionDigits: 0 });
 }
 
 function formatoCI(ci: number | null): string {
@@ -99,15 +96,15 @@ export default async function LigaPage({
           <tr>
             <th>#</th>
             <th>Célula</th>
-            <th>Ingreso</th>
-            <th>Integrantes</th>
-            <th>Servicios de terceros</th>
-            <th>Equipamiento</th>
-            <th>Centro asignado</th>
-            <th>Costo total</th>
-            <th>C/I</th>
-            <th>Variación</th>
-            <th>Desvío vs. promedio</th>
+            <th className="num">Ingreso</th>
+            <th className="num">Integrantes</th>
+            <th className="num">Servicios de terceros</th>
+            <th className="num">Equipamiento</th>
+            <th className="num">Centro asignado</th>
+            <th className="num">Costo total</th>
+            <th className="num">C/I</th>
+            <th className="num">Variación</th>
+            <th className="num">Desvío vs. promedio</th>
           </tr>
         </thead>
         <tbody>
@@ -117,24 +114,50 @@ export default async function LigaPage({
             <tr key={celula.id} style={{ opacity: operaba ? 1 : 0.5 }}>
               <td>{posicion ?? "—"}</td>
               <td>{celula.nombre}{!operaba && ` (de baja desde ${formatoMes(desplazarMes(celula.fecha_baja!.slice(0, 7), 1))})`}</td>
-              <td>{actual.ingreso !== null ? formatoMoneda(actual.ingreso) : "—"}</td>
-              <td>{formatoMoneda(actual.costoIntegrantes)}</td>
-              <td>{formatoMoneda(actual.costoServiciosTerceros)}</td>
-              <td>{formatoMoneda(actual.costoEquipamiento)}</td>
-              <td>{formatoMoneda(actual.costoCentroAsignado)}</td>
-              <td>{formatoMoneda(actual.costoTotal)}</td>
-              <td style={posicion === 1 ? { color: "var(--color-success)", fontWeight: 700 } : undefined}>
+              <td className="num">{actual.ingreso !== null ? formatoMoneda(actual.ingreso) : "—"}</td>
+              <td className="num">{formatoMoneda(actual.costoIntegrantes)}</td>
+              <td className="num">{formatoMoneda(actual.costoServiciosTerceros)}</td>
+              <td className="num">{formatoMoneda(actual.costoEquipamiento)}</td>
+              <td className="num">{formatoMoneda(actual.costoCentroAsignado)}</td>
+              <td className="num">{formatoMoneda(actual.costoTotal)}</td>
+              <td
+                className="num"
+                style={posicion === 1 ? { color: "var(--color-success)", fontWeight: 700 } : undefined}
+              >
                 {formatoCI(actual.ci)}
               </td>
-              <td className={variacion !== null && variacion > 0 ? "aviso" : undefined}>
+              <td className={`num${variacion !== null && variacion > 0 ? " aviso" : ""}`}>
                 {variacion === null ? "—" : `${variacion > 0 ? "+" : ""}${(variacion * 100).toFixed(1)} p.p.`}
               </td>
-              <td>{desvio === null ? "—" : `${desvio > 0 ? "+" : ""}${(desvio * 100).toFixed(1)} p.p.`}</td>
+              <td className="num">{desvio === null ? "—" : `${desvio > 0 ? "+" : ""}${(desvio * 100).toFixed(1)} p.p.`}</td>
             </tr>
             );
           })}
         </tbody>
       </table>
+
+      <dl style={{ color: "var(--color-text-muted)", fontSize: "0.9rem", marginTop: "1.5rem", maxWidth: "48rem" }}>
+        <dt style={{ fontWeight: 700 }}>#</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Posición en el ranking del período — menor C/I es mejor.</dd>
+        <dt style={{ fontWeight: 700 }}>Ingreso</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Lo facturado a clientes en el período, pauta de medios incluida.</dd>
+        <dt style={{ fontWeight: 700 }}>Integrantes</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Costo de sueldos, prorrateado según el % de dedicación de cada persona a la célula.</dd>
+        <dt style={{ fontWeight: 700 }}>Servicios de terceros</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Lo pagado a proveedores externos, pauta de medios incluida.</dd>
+        <dt style={{ fontWeight: 700 }}>Equipamiento</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Cuota de depreciación (costo de reposición ÷ vida útil) de los equipos de la célula.</dd>
+        <dt style={{ fontWeight: 700 }}>Centro asignado</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Parte del costo de las células de centro que le toca a esta célula, repartido en partes iguales entre la periferia que operaba ese período.</dd>
+        <dt style={{ fontWeight: 700 }}>Costo total</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Integrantes + servicios de terceros + equipamiento + centro asignado.</dd>
+        <dt style={{ fontWeight: 700 }}>C/I</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Costo total ÷ ingreso. Más bajo es mejor.</dd>
+        <dt style={{ fontWeight: 700 }}>Variación</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Diferencia de C/I contra el mismo tipo de período inmediato anterior (mes, trimestre o año móvil según la pestaña activa).</dd>
+        <dt style={{ fontWeight: 700 }}>Desvío vs. promedio</dt>
+        <dd style={{ margin: "0 0 0.6rem" }}>Diferencia de C/I contra el promedio del grupo en este mismo período.</dd>
+      </dl>
     </main>
     </>
   );
