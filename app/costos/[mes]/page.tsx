@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Header from "@/components/Header";
+import BotonBorrar from "@/components/BotonBorrar";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { mesADate, mesAnterior, mesSiguiente, formatoMes } from "@/lib/mes";
 import {
@@ -82,7 +83,7 @@ export default async function CostosMesPage({
               <td>{s.monto}</td>
               <td>
                 <form action={eliminarSueldo.bind(null, mes, s.id)}>
-                  <button type="submit">Borrar</button>
+                  <BotonBorrar />
                 </form>
               </td>
             </tr>
@@ -116,7 +117,7 @@ export default async function CostosMesPage({
               <td>{a.porcentaje}</td>
               <td>
                 <form action={eliminarAsignacion.bind(null, mes, a.id)}>
-                  <button type="submit">Borrar</button>
+                  <BotonBorrar />
                 </form>
               </td>
             </tr>
@@ -149,7 +150,7 @@ export default async function CostosMesPage({
               <td>{s.monto}</td>
               <td>
                 <form action={eliminarServicio.bind(null, mes, s.id)}>
-                  <button type="submit">Borrar</button>
+                  <BotonBorrar />
                 </form>
               </td>
             </tr>
@@ -180,7 +181,7 @@ export default async function CostosMesPage({
               <td>{(Number(e.costo_reposicion) / Number(e.vida_util_meses)).toFixed(2)}</td>
               <td>
                 <form action={eliminarEquipamientoCosto.bind(null, mes, e.id)}>
-                  <button type="submit">Borrar</button>
+                  <BotonBorrar />
                 </form>
               </td>
             </tr>

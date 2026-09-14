@@ -15,6 +15,7 @@ export default async function Header() {
           <li><Link href="/celulas">Células</Link></li>
           <li><Link href="/integrantes">Integrantes</Link></li>
           <li><Link href="/costos">Costos mensuales</Link></li>
+          <li><Link href="/equipamiento">Equipamiento</Link></li>
           <li><Link href="/facturas">Facturas</Link></li>
           <li><Link href="/liga">Liga</Link></li>
           <li><Link href="/centro">Centro</Link></li>

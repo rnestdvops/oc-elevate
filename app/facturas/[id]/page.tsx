@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import Header from "@/components/Header";
+import BotonBorrar from "@/components/BotonBorrar";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { dateAMes } from "@/lib/mes";
 import {
@@ -8,14 +9,18 @@ import {
   crearReparto,
   eliminarReparto,
   crearNotaCredito,
+  eliminarFactura,
 } from "../actions";
 
 export default async function FacturaPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ id: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { id } = await params;
+  const { error: errorBorrado } = await searchParams;
   const supabase = await createServerSupabase();
 
   const [{ data: factura }, { data: celulas }, { data: repartos }, { data: notasCredito }] =
@@ -35,6 +40,7 @@ export default async function FacturaPage({
   const actualizarConId = actualizarFactura.bind(null, id);
   const crearRepartoConId = crearReparto.bind(null, id);
   const crearNotaCreditoConId = crearNotaCredito.bind(null, id);
+  const eliminarConId = eliminarFactura.bind(null, id);
 
   return (
     <>
@@ -42,6 +48,7 @@ export default async function FacturaPage({
     <main style={{ padding: "2rem" }}>
       <p><Link href="/facturas">← Facturas</Link></p>
       <h1>{esNotaCredito ? "Nota de crédito" : "Factura"}</h1>
+      {errorBorrado && <p className="aviso">{errorBorrado}</p>}
 
       {esNotaCredito && factura.factura_relacionada_id && (
         <p>
@@ -71,6 +78,12 @@ export default async function FacturaPage({
         <button type="submit">Guardar</button>
       </form>
 
+      <form action={eliminarConId} style={{ marginTop: "1rem" }}>
+        <BotonBorrar
+          confirmar={`¿Borrar ${esNotaCredito ? "esta nota de crédito" : "esta factura"}? Se borra también su reparto. Esta acción no se puede deshacer.`}
+        />
+      </form>
+
       <h2>Reparto entre células y meses</h2>
       <p className={completo ? "" : "aviso"}>
         Repartido: {repartido} de {factura.monto_total} {!completo && "⚠ no coincide con el monto total"}
@@ -87,7 +100,7 @@ export default async function FacturaPage({
               <td>{r.monto}</td>
               <td>
                 <form action={eliminarReparto.bind(null, id, r.id)}>
-                  <button type="submit">Borrar</button>
+                  <BotonBorrar confirmar="¿Borrar esta línea del reparto?" />
                 </form>
               </td>
             </tr>

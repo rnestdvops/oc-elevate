@@ -95,3 +95,32 @@ export async function eliminarReparto(facturaId: string, id: string) {
   if (error) throw new Error(error.message);
   revalidatePath(`/facturas/${facturaId}`);
 }
+
+export async function eliminarFactura(id: string) {
+  const supabase = await createServerSupabase();
+
+  const { count } = await supabase
+    .from("factura")
+    .select("id", { count: "exact", head: true })
+    .eq("factura_relacionada_id", id);
+
+  if (count && count > 0) {
+    redirect(
+      `/facturas/${id}?error=${encodeURIComponent(
+        "No se puede borrar: tiene notas de crédito asociadas. Borralas primero."
+      )}`
+    );
+  }
+
+  // El reparto es propio de esta factura — se borra junto con ella, no
+  // queda huérfano ni referencia nada más.
+  await supabase.from("asignacion_de_factura").delete().eq("factura_id", id);
+
+  const { error } = await supabase.from("factura").delete().eq("id", id);
+  if (error) {
+    redirect(`/facturas/${id}?error=${encodeURIComponent(error.message)}`);
+  }
+
+  revalidatePath("/facturas");
+  redirect("/facturas");
+}

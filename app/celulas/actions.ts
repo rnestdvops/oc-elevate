@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
+import { mensajeErrorBorrado } from "@/lib/db";
 
 export async function crearCelula(formData: FormData) {
   const supabase = await createServerSupabase();
@@ -34,6 +35,22 @@ export async function actualizarCelula(id: string, formData: FormData) {
     .eq("id", id);
 
   if (error) throw new Error(error.message);
+
+  revalidatePath("/celulas");
+  redirect("/celulas");
+}
+
+export async function eliminarCelula(id: string) {
+  const supabase = await createServerSupabase();
+  const { error } = await supabase.from("celula").delete().eq("id", id);
+
+  if (error) {
+    redirect(
+      `/celulas/${id}?error=${encodeURIComponent(
+        mensajeErrorBorrado(error, "sueldos, servicios, equipamiento, asignaciones de factura o costos de centro")
+      )}`
+    );
+  }
 
   revalidatePath("/celulas");
   redirect("/celulas");
