@@ -14,6 +14,7 @@ export default async function HomePage() {
         <ul>
           <li><a href="/celulas">Células</a></li>
           <li><a href="/integrantes">Integrantes</a></li>
+          <li><a href="/costos">Costos mensuales</a></li>
           <li><a href="/facturas">Facturas</a></li>
           <li><a href="/liga">Liga</a></li>
           <li><a href="/centro">Centro</a></li>
