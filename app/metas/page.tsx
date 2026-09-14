@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Header from "@/components/Header";
 import SelectorPeriodo from "@/components/SelectorPeriodo";
 import { createServerSupabase } from "@/lib/supabase/server";
@@ -7,6 +8,10 @@ import { calcularMetas, type ConfigMetas } from "@/lib/metas";
 import { mesActual, ultimosMeses, mesADate } from "@/lib/mes";
 import { formatoMoneda } from "@/lib/formato";
 import { guardarConfigMetas, guardarVoluntario } from "./actions";
+
+export const metadata: Metadata = {
+  title: "Elevate — Metas relativas",
+};
 
 const PERIODOS = { mes: 1, trimestre: 3, anio: 12 } as const;
 type Periodo = keyof typeof PERIODOS;
