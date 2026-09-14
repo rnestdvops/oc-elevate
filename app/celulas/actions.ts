@@ -12,7 +12,7 @@ export async function crearCelula(formData: FormData) {
     nombre: String(formData.get("nombre")),
     tipo: String(formData.get("tipo")),
     pais_mercado: String(formData.get("pais_mercado") || "") || null,
-    activa: formData.get("activa") === "on",
+    fecha_baja: String(formData.get("fecha_baja") || "") || null,
   });
 
   if (error) throw new Error(error.message);
@@ -30,7 +30,7 @@ export async function actualizarCelula(id: string, formData: FormData) {
       nombre: String(formData.get("nombre")),
       tipo: String(formData.get("tipo")),
       pais_mercado: String(formData.get("pais_mercado") || "") || null,
-      activa: formData.get("activa") === "on",
+      fecha_baja: String(formData.get("fecha_baja") || "") || null,
     })
     .eq("id", id);
 

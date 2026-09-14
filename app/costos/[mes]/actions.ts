@@ -1,8 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { mesADate, mesAnterior } from "@/lib/mes";
+
+const EPSILON = 0.01;
 
 function numero(formData: FormData, key: string): number {
   return Number(formData.get(key));
@@ -31,12 +34,39 @@ export async function eliminarSueldo(mes: string, id: string) {
 
 export async function crearAsignacion(mes: string, formData: FormData) {
   const supabase = await createServerSupabase();
+  const integranteId = String(formData.get("integrante_id"));
+  const celulaId = String(formData.get("celula_id"));
+  const porcentaje = numero(formData, "porcentaje");
+  const fecha = mesADate(mes);
+
+  // Bloqueo real (no solo aviso, decisión de Ernesto): la suma de % de un
+  // integrante ese mes no puede pasar de 100. Se excluye la fila de esta
+  // misma célula porque el upsert la reemplaza, no la suma aparte.
+  const { data: existentes } = await supabase
+    .from("asignacion_mensual")
+    .select("celula_id, porcentaje")
+    .eq("integrante_id", integranteId)
+    .eq("mes", fecha);
+
+  const sumaOtras = (existentes ?? [])
+    .filter((a) => a.celula_id !== celulaId)
+    .reduce((acc, a) => acc + Number(a.porcentaje), 0);
+
+  if (sumaOtras + porcentaje > 100 + EPSILON) {
+    const disponible = Math.max(0, 100 - sumaOtras);
+    redirect(
+      `/costos/${mes}?error=${encodeURIComponent(
+        `Ese % supera el 100% del integrante ese mes (disponible: ${disponible.toFixed(2)}%).`
+      )}`
+    );
+  }
+
   const { error } = await supabase.from("asignacion_mensual").upsert(
     {
-      integrante_id: String(formData.get("integrante_id")),
-      celula_id: String(formData.get("celula_id")),
-      mes: mesADate(mes),
-      porcentaje: numero(formData, "porcentaje"),
+      integrante_id: integranteId,
+      celula_id: celulaId,
+      mes: fecha,
+      porcentaje,
     },
     { onConflict: "integrante_id,celula_id,mes" }
   );

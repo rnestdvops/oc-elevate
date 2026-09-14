@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { obtenerDatosCrudos } from "@/lib/datosFinancieros";
-import { calcularPeriodo, promedioCI, rankingCI, type Celula } from "@/lib/calculo";
+import { calcularPeriodo, promedioCI, rankingCI, operabaEnMes, type Celula } from "@/lib/calculo";
 import { mesActual, ultimosMeses, desplazarMes, formatoMes } from "@/lib/mes";
 
 const PERIODOS = { mes: 1, trimestre: 3, anio: 12 } as const;
@@ -111,10 +111,12 @@ export default async function LigaPage({
           </tr>
         </thead>
         <tbody>
-          {periferia.map(({ celula, actual, variacion, desvio, posicion }) => (
-            <tr key={celula.id} style={{ opacity: celula.activa ? 1 : 0.5 }}>
+          {periferia.map(({ celula, actual, variacion, desvio, posicion }) => {
+            const operaba = operabaEnMes(celula, mesesActual[mesesActual.length - 1]);
+            return (
+            <tr key={celula.id} style={{ opacity: operaba ? 1 : 0.5 }}>
               <td>{posicion ?? "—"}</td>
-              <td>{celula.nombre}{!celula.activa && " (inactiva)"}</td>
+              <td>{celula.nombre}{!operaba && ` (de baja desde ${formatoMes(desplazarMes(celula.fecha_baja!.slice(0, 7), 1))})`}</td>
               <td>{actual.ingreso !== null ? formatoMoneda(actual.ingreso) : "—"}</td>
               <td>{formatoMoneda(actual.costoIntegrantes)}</td>
               <td>{formatoMoneda(actual.costoServiciosTerceros)}</td>
@@ -129,7 +131,8 @@ export default async function LigaPage({
               </td>
               <td>{desvio === null ? "—" : `${desvio > 0 ? "+" : ""}${(desvio * 100).toFixed(1)} p.p.`}</td>
             </tr>
-          ))}
+            );
+          })}
         </tbody>
       </table>
     </main>

@@ -9,7 +9,11 @@ create table elevate.celula (
   nombre text not null,
   tipo text not null check (tipo in ('periferia', 'centro')),
   pais_mercado text,
-  activa boolean not null default true
+  -- Nula = sigue operando. Una célula no puede estar "inactiva un mes
+  -- puntual" (decisión de Ernesto, ver sql/migrations/0001_*): cuenta
+  -- completa (costo de centro, divisor, ranking) en todos los meses hasta
+  -- el de fecha_baja inclusive, y deja de contar desde el mes siguiente.
+  fecha_baja date
 );
 
 create table elevate.integrante (

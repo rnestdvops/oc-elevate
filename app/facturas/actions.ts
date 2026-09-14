@@ -5,6 +5,8 @@ import { redirect } from "next/navigation";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { mesADate } from "@/lib/mes";
 
+const EPSILON = 0.01;
+
 export async function crearFactura(formData: FormData) {
   const supabase = await createServerSupabase();
 
@@ -73,9 +75,27 @@ export async function actualizarFactura(id: string, formData: FormData) {
 export async function crearReparto(facturaId: string, formData: FormData) {
   const supabase = await createServerSupabase();
 
-  const { data: factura } = await supabase.from("factura").select("tipo").eq("id", facturaId).single();
+  const { data: factura } = await supabase.from("factura").select("tipo, monto_total").eq("id", facturaId).single();
   const montoIngresado = Number(formData.get("monto"));
   const monto = factura?.tipo === "nota_credito" ? -Math.abs(montoIngresado) : montoIngresado;
+
+  // Bloqueo real (no solo aviso, decisión de Ernesto): el reparto no puede
+  // pasar el monto total de la factura.
+  const { data: repartos } = await supabase
+    .from("asignacion_de_factura")
+    .select("monto")
+    .eq("factura_id", facturaId);
+  const repartido = (repartos ?? []).reduce((acc, r) => acc + Number(r.monto), 0);
+  const total = Number(factura?.monto_total ?? 0);
+
+  if (Math.abs(repartido + monto) > Math.abs(total) + EPSILON) {
+    const disponible = Math.abs(total) - Math.abs(repartido);
+    redirect(
+      `/facturas/${facturaId}?error=${encodeURIComponent(
+        `Ese monto supera el total de la factura (disponible: ${disponible.toFixed(2)}).`
+      )}`
+    );
+  }
 
   const { error } = await supabase.from("asignacion_de_factura").insert({
     factura_id: facturaId,

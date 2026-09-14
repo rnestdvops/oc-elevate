@@ -25,7 +25,7 @@ export default async function CelulasPage() {
             <th>Nombre</th>
             <th>Tipo</th>
             <th>País/mercado</th>
-            <th>Activa</th>
+            <th>Fecha de baja</th>
             <th></th>
           </tr>
         </thead>
@@ -35,7 +35,7 @@ export default async function CelulasPage() {
               <td>{c.nombre}</td>
               <td>{c.tipo}</td>
               <td>{c.pais_mercado ?? "—"}</td>
-              <td>{c.activa ? "Sí" : "No"}</td>
+              <td>{c.fecha_baja ?? "—"}</td>
               <td><Link href={`/celulas/${c.id}`}>Editar</Link></td>
             </tr>
           ))}
@@ -60,7 +60,7 @@ export default async function CelulasPage() {
           <label>País/mercado <input name="pais_mercado" /></label>
         </div>
         <div>
-          <label><input type="checkbox" name="activa" defaultChecked /> Activa</label>
+          <label>Fecha de baja (vacío = sigue operando) <input name="fecha_baja" type="date" /></label>
         </div>
         <button type="submit">Crear</button>
       </form>

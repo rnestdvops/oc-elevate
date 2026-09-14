@@ -51,7 +51,7 @@ export default async function EditarCelulaPage({
           <label>País/mercado <input name="pais_mercado" defaultValue={celula.pais_mercado ?? ""} /></label>
         </div>
         <div>
-          <label><input type="checkbox" name="activa" defaultChecked={celula.activa} /> Activa</label>
+          <label>Fecha de baja (vacío = sigue operando) <input name="fecha_baja" type="date" defaultValue={celula.fecha_baja ?? ""} /></label>
         </div>
         <button type="submit">Guardar</button>
       </form>

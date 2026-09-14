@@ -29,7 +29,7 @@ export async function obtenerDatosCrudos(
     { data: equipamientoCostos },
     { data: asignacionesFactura },
   ] = await Promise.all([
-    supabase.from("celula").select("id, nombre, tipo, activa"),
+    supabase.from("celula").select("id, nombre, tipo, fecha_baja"),
     supabase.from("sueldo_mensual").select("integrante_id, mes, monto").in("mes", fechas),
     supabase.from("asignacion_mensual").select("integrante_id, celula_id, mes, porcentaje").in("mes", fechas),
     supabase.from("servicio_tercero").select("celula_id, mes, monto").in("mes", fechas),

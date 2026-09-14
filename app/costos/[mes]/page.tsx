@@ -18,10 +18,13 @@ import {
 
 export default async function CostosMesPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ mes: string }>;
+  searchParams: Promise<{ error?: string }>;
 }) {
   const { mes } = await params;
+  const { error: errorValidacion } = await searchParams;
   const fecha = mesADate(mes);
   const supabase = await createServerSupabase();
 
@@ -44,7 +47,8 @@ export default async function CostosMesPage({
   ]);
 
   // Suma de porcentaje asignado por integrante este mes (spec 3.4: debe dar
-  // 100). Se muestra como aviso, no se bloquea el guardado fila por fila.
+  // 100). Nunca puede pasar de 100 — el server action lo bloquea — pero
+  // puede quedar incompleta mientras se sigue cargando.
   const sumaPorIntegrante = new Map<string, number>();
   for (const a of asignaciones ?? []) {
     sumaPorIntegrante.set(a.integrante_id, (sumaPorIntegrante.get(a.integrante_id) ?? 0) + Number(a.porcentaje));
@@ -62,6 +66,7 @@ export default async function CostosMesPage({
     <Header />
     <main style={{ padding: "2rem" }}>
       <h1>Costos — {formatoMes(mes)}</h1>
+      {errorValidacion && <p className="aviso">{errorValidacion}</p>}
       <p>
         <Link href={`/costos/${mesAnterior(mes)}`}>← mes anterior</Link>
         {" · "}

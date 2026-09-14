@@ -2,7 +2,7 @@ import Link from "next/link";
 import Header from "@/components/Header";
 import { createServerSupabase } from "@/lib/supabase/server";
 import { obtenerDatosCrudos } from "@/lib/datosFinancieros";
-import { calcularPeriodo, type Celula } from "@/lib/calculo";
+import { calcularPeriodo, operabaEnMes, type Celula } from "@/lib/calculo";
 import { mesActual, ultimosMeses, desplazarMes, formatoMes } from "@/lib/mes";
 
 const PERIODOS = { mes: 1, trimestre: 3, anio: 12 } as const;
@@ -32,8 +32,9 @@ export default async function CentroPage({
   const celulas: Celula[] = datos.celulas;
   const resultados = calcularPeriodo(meses, datos);
 
+  const ultimoMes = meses[meses.length - 1];
   const centro = celulas.filter((c) => c.tipo === "centro");
-  const periferiaActivas = celulas.filter((c) => c.tipo === "periferia" && c.activa);
+  const periferiaOperando = celulas.filter((c) => c.tipo === "periferia" && operabaEnMes(c, ultimoMes));
   const costoCentroTotal = centro.reduce(
     (acc, c) => acc + (resultados.find((r) => r.celulaId === c.id)?.costoDirecto ?? 0),
     0
@@ -77,7 +78,7 @@ export default async function CentroPage({
         <tbody>
           {centro.map((c) => (
             <tr key={c.id}>
-              <td>{c.nombre}{!c.activa && " (inactiva)"}</td>
+              <td>{c.nombre}</td>
               <td>{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoDirecto ?? 0)}</td>
             </tr>
           ))}
@@ -94,7 +95,7 @@ export default async function CentroPage({
         </p>
       )}
 
-      <h2>Reparto entre células de periferia activas ({periferiaActivas.length})</h2>
+      <h2>Reparto entre células de periferia que operaban ({periferiaOperando.length})</h2>
       <table border={1} cellPadding={6}>
         <thead>
           <tr><th>Célula</th><th>Centro asignado</th></tr>
@@ -102,12 +103,15 @@ export default async function CentroPage({
         <tbody>
           {celulas
             .filter((c) => c.tipo === "periferia")
-            .map((c) => (
-              <tr key={c.id} style={{ opacity: c.activa ? 1 : 0.5 }}>
-                <td>{c.nombre}{!c.activa && " (inactiva — no participa del reparto)"}</td>
-                <td>{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoCentroAsignado ?? 0)}</td>
-              </tr>
-            ))}
+            .map((c) => {
+              const operaba = operabaEnMes(c, ultimoMes);
+              return (
+                <tr key={c.id} style={{ opacity: operaba ? 1 : 0.5 }}>
+                  <td>{c.nombre}{!operaba && " (dada de baja — no participa del reparto)"}</td>
+                  <td>{formatoMoneda(resultados.find((r) => r.celulaId === c.id)?.costoCentroAsignado ?? 0)}</td>
+                </tr>
+              );
+            })}
         </tbody>
       </table>
     </main>

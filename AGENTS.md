@@ -31,14 +31,18 @@ routing, cache, `cookies()`/`headers()`/`params` async, o el archivo de proxy, r
 `node_modules/next/dist/docs/01-app/02-guides/upgrading/version-16.md` en vez de asumir el
 comportamiento de una versión anterior.
 
-## Reglas de cálculo (resumen — la fuente de verdad es la spec)
+## Reglas de cálculo (resumen — la fuente de verdad es la spec + decisiones de Ernesto)
 
-- Costo de centro se reparte en partes iguales entre las células de periferia **activas** ese
-  mes.
+- Costo de centro se reparte en partes iguales entre las células de periferia que **operaban**
+  ese mes (`celula.fecha_baja`, no un booleano — ver `lib/calculo.ts`, `operabaEnMes`). Una
+  célula no puede estar "inactiva un mes puntual": cuenta completa (bajo desempeño incluido,
+  eso debe verse en la liga) hasta su mes de baja inclusive, y deja de contar recién el mes
+  siguiente. El historial pasado nunca se recalcula al dar de baja una célula hoy.
 - Trimestre y año móvil suman meses reales, nunca multiplican un mes.
 - El ingreso incluye la pauta gestionada — no comparar este C/I con el de la planilla Excel
   previa.
 - No hay ningún indicador a nivel Integrante — la unidad de medida es siempre la célula.
 - Las sumas de porcentaje (`asignacion_mensual`) y de reparto de factura
-  (`asignacion_de_factura`) se validan en la capa de aplicación, no en SQL (ver comentarios en
-  `sql/schema.sql`).
+  (`asignacion_de_factura`) se **bloquean** en la capa de aplicación si superan el 100% o el
+  monto total (decisión de Ernesto — no es solo un aviso). No hay constraint SQL para esto (ver
+  comentarios en `sql/schema.sql`) porque depende de sumar filas ya cargadas, no de una sola fila.

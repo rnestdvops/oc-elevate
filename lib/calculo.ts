@@ -1,21 +1,28 @@
 // Implementación de la sección 5 de docs/Elevate_Spec_Sistema_CI.md.
 //
-// Nota de diseño (no una regla de negocio, una limitación de esquema): el
-// schema guarda `celula.activa` como un único booleano, no versionado por
-// mes (sql/schema.sql, sección 3.1 de la spec). La spec (secciones 3 y 7)
-// habla de una célula "marcada como activa=false en un mes", que sugiere un
-// historial mes a mes — el modelo actual no lo tiene. Estos cálculos usan el
-// valor ACTUAL de `activa` para todos los meses del período (incluidos
-// meses pasados). Si en algún momento hace falta que la actividad histórica
-// no cambie retroactivamente al desactivar una célula hoy, hay que
-// versionar `activa` por mes en el schema — no es un cambio menor, así que
-// se deja documentado acá en vez de improvisarlo en el cálculo.
+// Una célula no puede estar "inactiva un mes puntual" (decisión de Ernesto,
+// ver sql/migrations/0001_celula_fecha_baja.sql): o compite, aunque tenga
+// bajo desempeño o estacionalidad — eso debe verse en la liga, no
+// esconderse — o fue dada de baja definitivamente y su gente se
+// redistribuyó a otras células. Por eso `fecha_baja` es una fecha (no un
+// booleano): la célula cuenta completa (costo de centro, divisor, ranking)
+// en todos los meses hasta el de fecha_baja inclusive, y deja de contar
+// desde el mes siguiente — sin alterar el historial de los meses en que sí
+// operaba.
 
 export interface Celula {
   id: string;
   nombre: string;
   tipo: "periferia" | "centro";
-  activa: boolean;
+  fecha_baja: string | null;
+}
+
+// La célula operaba durante `mes` ("YYYY-MM") si todavía no fue dada de
+// baja, o si la baja ocurrió ese mismo mes o después (comparación de
+// strings "YYYY-MM" funciona lexicográficamente).
+export function operabaEnMes(celula: Celula, mes: string): boolean {
+  if (!celula.fecha_baja) return true;
+  return celula.fecha_baja.slice(0, 7) >= mes;
 }
 
 interface Sueldo {
@@ -123,8 +130,8 @@ export function calcularMes(mes: string, datos: DatosCrudos): ResultadoMesCelula
     return acc + (d ? d.integrantes + d.servicios + d.equipamiento : 0);
   }, 0);
 
-  const periferiaActivas = datos.celulas.filter((c) => c.tipo === "periferia" && c.activa);
-  const costoCentroAsignado = periferiaActivas.length > 0 ? costoCentroTotal / periferiaActivas.length : 0;
+  const periferiaOperando = datos.celulas.filter((c) => c.tipo === "periferia" && operabaEnMes(c, mes));
+  const costoCentroAsignado = periferiaOperando.length > 0 ? costoCentroTotal / periferiaOperando.length : 0;
 
   const ingresoPorCelula = new Map<string, number>();
   for (const af of datos.asignacionesFactura) {
@@ -150,10 +157,9 @@ export function calcularMes(mes: string, datos: DatosCrudos): ResultadoMesCelula
       };
     }
 
-    // Una periferia inactiva ese mes no participa del reparto de costo de
-    // centro (spec 7): ni cuenta en el divisor (ya excluida arriba de
-    // periferiaActivas) ni recibe una porción ese mes.
-    const recibeCentro = c.activa ? costoCentroAsignado : 0;
+    // Si ya no operaba ese mes (dada de baja antes), no recibe porción de
+    // centro — ni cuenta en el divisor (ya excluida arriba).
+    const recibeCentro = operabaEnMes(c, mes) ? costoCentroAsignado : 0;
     const costoTotal = costoDirecto + recibeCentro;
     const ingreso = ingresoPorCelula.get(c.id) ?? 0;
     const ci = ingreso !== 0 ? costoTotal / ingreso : null;
