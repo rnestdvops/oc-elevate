@@ -46,3 +46,21 @@ comportamiento de una versión anterior.
   (`asignacion_de_factura`) se **bloquean** en la capa de aplicación si superan el 100% o el
   monto total (decisión de Ernesto — no es solo un aviso). No hay constraint SQL para esto (ver
   comentarios en `sql/schema.sql`) porque depende de sumar filas ya cargadas, no de una sola fila.
+
+## Metas relativas y métricas propias — no están en la spec original
+
+Dos paneles dictados por Ernesto en conversación (`sql/migrations/0002_metas_y_metricas.sql`),
+sin relación con `docs/Elevate_Spec_Sistema_CI.md`:
+
+- **`/metas`** — piso de rentabilidad esperada (% de margen) y % de reparto del excedente,
+  calculado global y por célula a partir de los mismos `ingreso`/`costoTotal` de la Liga
+  (`lib/metas.ts`). Una sola regla vigente por vez (config única, `config_metas`, id fijo
+  `'global'`): `individual` (cada célula reparte lo suyo), `piso_global` (si el global no
+  supera su piso, no reparte nadie — es un gate previo a la lógica individual, no otro cálculo)
+  o `voluntario` (igual que individual, pero cada célula necesita un sí/no explícito por mes en
+  `reparto_voluntario` para que cuente — sin carga de monto/destinatario libre, eso quedó fuera
+  de esta versión).
+- **`/metricas`** — métricas predictoras propias por célula (no financieras): nombre + unidad
+  libres, un valor numérico por mes. Trimestre/año suman los meses reales (igual criterio que
+  costos), pero lo que se muestra es la **variación % contra el mismo tipo de período
+  anterior**, no el valor absoluto — así sirve tanto para conteos como para métricas tipo %.

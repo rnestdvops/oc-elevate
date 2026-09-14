@@ -19,6 +19,8 @@ export default async function Header() {
           <li><Link href="/facturas">Facturas</Link></li>
           <li><Link href="/liga">Liga</Link></li>
           <li><Link href="/centro">Centro</Link></li>
+          <li><Link href="/metas">Metas</Link></li>
+          <li><Link href="/metricas">Métricas</Link></li>
         </ul>
       </nav>
       <span>{user?.email}</span>
